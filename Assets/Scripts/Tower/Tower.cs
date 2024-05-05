@@ -145,6 +145,6 @@ public class Tower : MonoBehaviour {
     public void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
