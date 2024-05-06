@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private int healthPoints;
+    private int healthStart;
     [SerializeField] private int rewardAmount;
+    [SerializeField] private Image healthBar;
     Animator anim;
     public float speed = 2f;
 
@@ -20,6 +23,7 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        healthStart = healthPoints;
         anim = GetComponent<Animator>();
         taget = Waypoints.points[0];
     }
@@ -51,14 +55,18 @@ public class Enemy : MonoBehaviour
 
     public void EnemyHit(int hitPoints)
     {
+        if (isDead)
+            return;
         if (healthPoints - hitPoints > 0)
         {
             healthPoints -= hitPoints;
+            healthBar.fillAmount = (float)healthPoints / healthStart;
             anim.Play("Hurt");
-            GameManager.Instance.AudioSource.PlayOneShot(SoundManager.Instance.Hit);
+            SoundManager.Instance.Play(SoundManager.Instance.Hit);
         }
         else
         {
+            healthBar.fillAmount = 0;
             anim.SetTrigger("didDie");
             Die();
         }
@@ -66,9 +74,18 @@ public class Enemy : MonoBehaviour
     void Die()
     {
         isDead = true;
-        GameManager.Instance.AudioSource.PlayOneShot(SoundManager.Instance.Death);
+        SoundManager.Instance.Play(SoundManager.Instance.Death);
         GameManager.Instance.AddMoney(rewardAmount);
+        GameManager.Instance.TotalKilled++;
+        //Debug.Log("TotalKilled" + GameManager.Instance.TotalKilled);
         Destroy(gameObject, 2f);
         gameObject.tag = "Untagged";
+    }
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.tag == "Finish")
+        {
+            GameManager.Instance.TotalEscape++;
+        }
     }
 }

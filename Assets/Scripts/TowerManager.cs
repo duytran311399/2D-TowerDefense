@@ -41,12 +41,15 @@ public class TowerManager : SingletonDontDestroyMono<TowerManager>
                 RegisterBuildSite(buildTile);
                 placeTower(hit);
             }
-            if (towerSellected != null)
-                towerSellected.OnDeSellectedTower();
-            if (hit.collider.tag == "tower")
+            else
             {
-                towerSellected = hit.transform.GetComponent<Tower>();
-                towerSellected.OnSellectTower();
+                if (towerSellected != null)
+                    towerSellected.OnDeSellectedTower();
+                if (hit.collider.tag == "tower")
+                {
+                    towerSellected = hit.transform.GetComponent<Tower>();
+                    towerSellected.OnSellectTower();
+                }
             }
         }
 
@@ -94,7 +97,7 @@ public class TowerManager : SingletonDontDestroyMono<TowerManager>
             Tower newTower = Instantiate(towerButtonPressed.TowerObject);
             newTower.transform.position = hit.transform.position;
             buyTower(towerButtonPressed.TowerPrice);
-            GameManager.Instance.AudioSource.PlayOneShot(SoundManager.Instance.TowerBuilt);
+            SoundManager.Instance.Play(SoundManager.Instance.TowerBuilt);
             RegisterTower(newTower);
             disableDragSprite();
         }

@@ -10,63 +10,70 @@ public enum gameStatus
 public class GameManager : SingletonDontDestroyMono<GameManager> 
 {
     [SerializeField] private int totalWaves;
-    [SerializeField] private Text totalMoneyLabel;
-    [SerializeField] private Text currentWaveLabel;
-    [SerializeField] private Text totalEscapedLabel;
     [SerializeField] private GameObject spawnPoint;
     [SerializeField] private List<WaySpawnData> waySpawnDatas;
     [SerializeField] private Enemy[] enemies;
 
-    [SerializeField] private Text playButtonLabel;
-    [SerializeField] private Button playButton;
-
-    private int waveCounter = 0;
     private int waveCurrent = 0;
     private int totalMoney = 10;
-    //private int totalEscaped = 0;
-    //private int roundEscaped = 0;
-    //private int totalKilled = 0;
-    //private int enemiesToSpawn = 0;
-    private gameStatus currentState = gameStatus.play;
-    private AudioSource audioSource;
+    private int totalEnemyEscaped = 0;
+    private int totalEscapedOnWave = 0;
+    private int totalKilled = 0;
+    private int totalKillEnemy = 0;
 
     public List<Enemy> EnemyList = new List<Enemy>();
-    const float spawnDelay = 2f; //Spawn Delay in seconds
+    const float spawnDelay = 0.5f;
+    public Coroutine C_Spawn;
 
+    public int TotalEnemy
+    {
+        get { return waySpawnDatas[waveCurrent].spawnData.enemies.Count; }
+    }
     public int TotalMoney
     {
         get { return totalMoney; }
         set
         {
             totalMoney = value;
-            totalMoneyLabel.text = totalMoney.ToString();
+            ScreenManager.Instance.SL_GamePlay.UpdateCoin(totalMoney);
         }
     }
-    //public int TotalEscape
-    //{
-    //    get { return totalEscaped; }
-    //    set { totalEscaped = value; }
-    //}
+    public int WayCurrent
+    {
+        get { return waveCurrent; }
+    }
+    public int TotalEscape
+    {
+        get { return totalEscapedOnWave; }
+        set 
+        { 
+            totalEscapedOnWave = value;
+            ScreenManager.Instance.SL_GamePlay.UpdateEscaped(totalEscapedOnWave + totalEnemyEscaped);
+        }
+    }
+    public int TotalEnemyEscaped
+    {
+        get { return totalEnemyEscaped; }
+    }
     //public int RoundEscaped
     //{
     //    get { return roundEscaped; }
     //    set { roundEscaped = value; }
     //}
-    //public int TotalKilled
-    //{
-    //    get { return totalKilled; }
-    //    set { totalKilled = value; }
-    //}
-    public AudioSource AudioSource
+    public int TotalKilled
     {
-        get { return audioSource; }
+        get { return totalKilled; }
+        set { totalKilled = value; }
     }
-    
+    public int TotalKillEnemy
+    {
+        get { return totalKillEnemy; }
+    }
+
     // Use this for initialization
     void Start () {
         totalWaves = waySpawnDatas.Count;
-        playButton.gameObject.SetActive(false);
-        audioSource = GetComponent<AudioSource>();
+        //audioSource = GetComponent<AudioSource>();
         ShowMenu();
 	}
 	
@@ -78,18 +85,23 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     //This will spawn enemies, wait for the given spawnDelay then call itself again to spawn another enemy
     IEnumerator spawn()
     {
-        if (EnemyList.Count < waySpawnDatas[waveCurrent].spawnData.enemies.Count)
+        if (EnemyList.Count < TotalEnemy)
         {
-            for (int i = 0; i < waySpawnDatas[waveCurrent].spawnData.enemies.Count; i++)
+            for (int i = 0; i < TotalEnemy; i++)
             {
-                Enemy newEnemy = Instantiate(enemies[waySpawnDatas[waveCurrent].spawnData.enemies[i]]);
+                Enemy newEnemy = Instantiate(enemies[waySpawnDatas[waveCurrent].GetEnemy(i)]);
                 newEnemy.transform.position = spawnPoint.transform.position;
                 RegisterEnemy(newEnemy);
                 yield return new WaitForSeconds(spawnDelay);
             }
         }
-
-        isWaveOver();
+        while(TotalEnemy > TotalKilled + TotalEscape)
+        {
+            yield return new WaitForSeconds(1f);
+            Debug.Log("Check Kill All");
+        }
+        //Debug.Log(TotalEnemy + " == " + TotalEscape + " + " + TotalKilled);
+        IsWaveOver();
     }
 
     ///Register - when enemy spawns
@@ -100,8 +112,6 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     ///Unregister - When they escape the screen
     public void UnregisterEnemy()
     {
-        //EnemyList.Remove(enemy);
-        //Destroy(enemy.gameObject);
         EnemyList.Clear();
     }
     ///Destroy - At the end of the wave
@@ -124,67 +134,26 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
         TotalMoney -= amount;
     }
 
-    public void isWaveOver()
+    public void IsWaveOver()
     {
-        totalEscapedLabel.text = "Wave Complete " + waveCounter + "/10";
         waveCurrent++;
-        setCurrentGameState();
         ShowMenu();
     }
-
-    public void setCurrentGameState()
-    {
-        if(waveCounter >= 10)
-        {
-            currentState = gameStatus.gameover;
-        }
-        else if(waveCounter == 0)
-        {
-            currentState = gameStatus.play;
-        }
-        else if(waveCounter >= totalWaves)
-        {
-            currentState = gameStatus.win;
-        }
-        else
-        {
-            currentState = gameStatus.next;
-        }
-    }
-
     public void ShowMenu()
     {
-        switch (currentState)
-        {
-            case gameStatus.gameover:
-                playButtonLabel.text = "Play Again!";
-                AudioSource.PlayOneShot(SoundManager.Instance.Gameover);
-                break;
-            case gameStatus.next:
-                playButtonLabel.text = "Next Wave";
-                break;
-            case gameStatus.play:
-                playButtonLabel.text = "Play";
-                break;
-            case gameStatus.win:
-                playButtonLabel.text = "Play";
-                break;
-        }
         if (waveCurrent == totalWaves)
-            Debug.Log("Win");
+            ScreenManager.Instance.SL_MainMenu.SetupVictory();
         else
-            playButton.gameObject.SetActive(true);
+            ScreenManager.Instance.SL_GamePlay.SetActivePlayButton(true);
     }
-    public void playButtonPressed()
+    public void SpawnNextWay()
     {
-        Debug.Log("Play Button Pressed");
+        totalEnemyEscaped += TotalEscape;
+        totalKillEnemy += TotalKilled;
+        TotalEscape = 0;
+        TotalKilled = 0;
         UnregisterEnemy();
-        totalEscapedLabel.text = "Wave: " + waveCounter + "/10";
-        AudioSource.PlayOneShot(SoundManager.Instance.NewGame);
-        currentWaveLabel.text = "Wave " + (waveCounter + 1);
         StartCoroutine(spawn());
-        waveCounter += 1;
-        playButton.gameObject.SetActive(false);
     }
     private void handleEscape()
     {

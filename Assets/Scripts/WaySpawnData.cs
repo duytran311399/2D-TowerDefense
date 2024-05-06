@@ -6,6 +6,11 @@ using UnityEngine;
 public class WaySpawnData : ScriptableObject
 {
     public SpawnEnemyData spawnData;
+
+    public int GetEnemy(int i)
+    {
+        return spawnData.enemies[i];
+    }
 }
 [System.Serializable]
 public class SpawnEnemyData

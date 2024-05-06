@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SoundManager : SingletonDontDestroyMono<SoundManager> {
 
+    private AudioSource m_AudioSource;
     [SerializeField] private AudioClip arrow;
     [SerializeField] private AudioClip death;
     [SerializeField] private AudioClip fireball;
@@ -49,5 +50,15 @@ public class SoundManager : SingletonDontDestroyMono<SoundManager> {
     public AudioClip TowerBuilt
     {
         get { return towerBuilt; }
+    }
+
+    private void Start()
+    {
+        m_AudioSource = GetComponent<AudioSource>();
+    }
+
+    public void Play(AudioClip clip)
+    {
+        m_AudioSource.PlayOneShot(clip);
     }
 }

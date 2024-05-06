@@ -58,8 +58,11 @@ public class Projectile : MonoBehaviour {
     /// </summary>
     void HitTarget()
     {
-        //GameObject effectInt = Instantiate(impactEffect, target.position, target.rotation);
-        //Destroy(effectInt, 2f);
+        if(impactEffect != null)
+        {
+            GameObject effectInt = Instantiate(impactEffect, target.position, target.rotation);
+            Destroy(effectInt, 2f);
+        }
         Destroy(gameObject);
         var enemy = target.GetComponent<Enemy>();
         if(enemy != null && !enemy.IsDead)
