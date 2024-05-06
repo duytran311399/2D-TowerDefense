@@ -66,7 +66,6 @@ public class Enemy : MonoBehaviour
     void Die()
     {
         isDead = true;
-        GameManager.Instance.TotalKilled += 1;
         GameManager.Instance.AudioSource.PlayOneShot(SoundManager.Instance.Death);
         GameManager.Instance.AddMoney(rewardAmount);
         Destroy(gameObject, 2f);

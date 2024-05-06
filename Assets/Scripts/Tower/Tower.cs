@@ -140,6 +140,11 @@ public class Tower : MonoBehaviour
     {
         circleRange.gameObject.SetActive(false);
     }
+    public void OnDestroyTower()
+    {
+        Destroy(gameObject);
+
+    }
     ///Move Projectile to Target Enemy
     //IEnumerator MoveProjectile(Projectile projectile)
     //{

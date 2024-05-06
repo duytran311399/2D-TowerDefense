@@ -7,37 +7,26 @@ public enum gameStatus
 {
     next, play, gameover, win
 }
-public class GameManager : SingletonDontDestroyMono<GameManager> {
-    //SerializeField - Allows Inspector to get access to private fields.
-    //If we want to get access to this from another class, we'll just need to make public getters
-    [SerializeField]
-    private int totalWaves = 10;
-    [SerializeField]
-    private Text totalMoneyLabel;   //Refers to money label at upper left corner
-    [SerializeField]
-    private Text currentWaveLabel;
-    [SerializeField]
-    private Text totalEscapedLabel;
-    [SerializeField]
-    private GameObject spawnPoint;
-    [SerializeField]
-    private Enemy[] enemies;
-    [SerializeField]
-    private int totalEnemies = 3;
-    [SerializeField]
-    private int enemiesPerSpawn;
-    [SerializeField]
-    private Text playButtonLabel;
-    [SerializeField]
-    private Button playButton;
+public class GameManager : SingletonDontDestroyMono<GameManager> 
+{
+    [SerializeField] private int totalWaves;
+    [SerializeField] private Text totalMoneyLabel;
+    [SerializeField] private Text currentWaveLabel;
+    [SerializeField] private Text totalEscapedLabel;
+    [SerializeField] private GameObject spawnPoint;
+    [SerializeField] private List<WaySpawnData> waySpawnDatas;
+    [SerializeField] private Enemy[] enemies;
 
-    private int waveNumber = 0;
+    [SerializeField] private Text playButtonLabel;
+    [SerializeField] private Button playButton;
+
+    private int waveCounter = 0;
+    private int waveCurrent = 0;
     private int totalMoney = 10;
-    private int totalEscaped = 0;
-    private int roundEscaped = 0;
-    private int totalKilled = 0;
-    private int whichEnemiesToSpawn = 0;
-    private int enemiesToSpawn = 0;
+    //private int totalEscaped = 0;
+    //private int roundEscaped = 0;
+    //private int totalKilled = 0;
+    //private int enemiesToSpawn = 0;
     private gameStatus currentState = gameStatus.play;
     private AudioSource audioSource;
 
@@ -53,24 +42,21 @@ public class GameManager : SingletonDontDestroyMono<GameManager> {
             totalMoneyLabel.text = totalMoney.ToString();
         }
     }
-
-    public int TotalEscape
-    {
-        get { return totalEscaped; }
-        set { totalEscaped = value; }
-    }
- 
-    public int RoundEscaped
-    {
-        get { return roundEscaped; }
-        set { roundEscaped = value; }
-    }
-    public int TotalKilled
-    {
-        get { return totalKilled; }
-        set { totalKilled = value; }
-    }
-
+    //public int TotalEscape
+    //{
+    //    get { return totalEscaped; }
+    //    set { totalEscaped = value; }
+    //}
+    //public int RoundEscaped
+    //{
+    //    get { return roundEscaped; }
+    //    set { roundEscaped = value; }
+    //}
+    //public int TotalKilled
+    //{
+    //    get { return totalKilled; }
+    //    set { totalKilled = value; }
+    //}
     public AudioSource AudioSource
     {
         get { return audioSource; }
@@ -78,6 +64,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager> {
     
     // Use this for initialization
     void Start () {
+        totalWaves = waySpawnDatas.Count;
         playButton.gameObject.SetActive(false);
         audioSource = GetComponent<AudioSource>();
         ShowMenu();
@@ -91,19 +78,18 @@ public class GameManager : SingletonDontDestroyMono<GameManager> {
     //This will spawn enemies, wait for the given spawnDelay then call itself again to spawn another enemy
     IEnumerator spawn()
     {
-        if (enemiesPerSpawn > 0 && EnemyList.Count < totalEnemies)
+        if (EnemyList.Count < waySpawnDatas[waveCurrent].spawnData.enemies.Count)
         {
-            for (int i = 0; i < enemiesPerSpawn; i++)
+            for (int i = 0; i < waySpawnDatas[waveCurrent].spawnData.enemies.Count; i++)
             {
-                if (EnemyList.Count < totalEnemies)
-                {
-                    Enemy newEnemy = Instantiate(enemies[Random.Range(0, enemiesToSpawn)]);
-                    newEnemy.transform.position = spawnPoint.transform.position;
-                }
+                Enemy newEnemy = Instantiate(enemies[waySpawnDatas[waveCurrent].spawnData.enemies[i]]);
+                newEnemy.transform.position = spawnPoint.transform.position;
+                RegisterEnemy(newEnemy);
+                yield return new WaitForSeconds(spawnDelay);
             }
-            yield return new WaitForSeconds(spawnDelay);
-            StartCoroutine(spawn());
         }
+
+        isWaveOver();
     }
 
     ///Register - when enemy spawns
@@ -112,10 +98,11 @@ public class GameManager : SingletonDontDestroyMono<GameManager> {
         EnemyList.Add(enemy);
     }
     ///Unregister - When they escape the screen
-    public void UnregisterEnemy(Enemy enemy)
+    public void UnregisterEnemy()
     {
-        EnemyList.Remove(enemy);
-        Destroy(enemy.gameObject);
+        //EnemyList.Remove(enemy);
+        //Destroy(enemy.gameObject);
+        EnemyList.Clear();
     }
     ///Destroy - At the end of the wave
     public void DestroyAllEnemies()
@@ -139,29 +126,23 @@ public class GameManager : SingletonDontDestroyMono<GameManager> {
 
     public void isWaveOver()
     {
-        totalEscapedLabel.text = "Escaped " + TotalEscape + "/10";
-        if (RoundEscaped + TotalKilled == totalEnemies)
-        {
-            if(waveNumber <= enemies.Length)
-            {
-                enemiesToSpawn = waveNumber;
-            }
-            setCurrentGameState();
-            ShowMenu();
-        }
+        totalEscapedLabel.text = "Wave Complete " + waveCounter + "/10";
+        waveCurrent++;
+        setCurrentGameState();
+        ShowMenu();
     }
 
     public void setCurrentGameState()
     {
-        if(totalEscaped >= 10)
+        if(waveCounter >= 10)
         {
             currentState = gameStatus.gameover;
         }
-        else if(waveNumber == 0 && (TotalKilled + RoundEscaped) == 0)
+        else if(waveCounter == 0)
         {
             currentState = gameStatus.play;
         }
-        else if(waveNumber >= totalWaves)
+        else if(waveCounter >= totalWaves)
         {
             currentState = gameStatus.win;
         }
@@ -189,38 +170,25 @@ public class GameManager : SingletonDontDestroyMono<GameManager> {
                 playButtonLabel.text = "Play";
                 break;
         }
-        playButton.gameObject.SetActive(true);
+        if (waveCurrent == totalWaves)
+            Debug.Log("Win");
+        else
+            playButton.gameObject.SetActive(true);
     }
     public void playButtonPressed()
     {
         Debug.Log("Play Button Pressed");
-        switch (currentState)
-        {
-            case gameStatus.next:
-                waveNumber += 1;
-                totalEnemies += waveNumber;
-                break;
-            default:
-                totalEnemies = 3;
-                totalEscaped = 0;
-                TotalMoney = 10;
-                TowerManager.Instance.DestroyAllTower();
-                TowerManager.Instance.RenameTagsBuildSites();
-                totalMoneyLabel.text = TotalMoney.ToString();
-                totalEscapedLabel.text = "Escaped " + totalEscaped + "/10";
-                AudioSource.PlayOneShot(SoundManager.Instance.NewGame);
-                break;
-        }
-        DestroyAllEnemies();
-        TotalKilled = 0;
-        RoundEscaped = 0;
-        currentWaveLabel.text = "Wave " + (waveNumber + 1);
+        UnregisterEnemy();
+        totalEscapedLabel.text = "Wave: " + waveCounter + "/10";
+        AudioSource.PlayOneShot(SoundManager.Instance.NewGame);
+        currentWaveLabel.text = "Wave " + (waveCounter + 1);
         StartCoroutine(spawn());
+        waveCounter += 1;
         playButton.gameObject.SetActive(false);
     }
     private void handleEscape()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetMouseButtonDown(1))
         {
             TowerManager.Instance.disableDragSprite();
             TowerManager.Instance.towerButtonPressed = null;
