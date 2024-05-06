@@ -4,24 +4,15 @@ using UnityEngine;
 
 public class SoundManager : SingletonDontDestroyMono<SoundManager> {
 
-    [SerializeField]
-    private AudioClip arrow;
-    [SerializeField]
-    private AudioClip death;
-    [SerializeField]
-    private AudioClip fireball;
-    [SerializeField]
-    private AudioClip gameover;
-    [SerializeField]
-    private AudioClip hit;
-    [SerializeField]
-    private AudioClip level;
-    [SerializeField]
-    private AudioClip newGame;
-    [SerializeField]
-    private AudioClip rock;
-    [SerializeField]
-    private AudioClip towerBuilt;
+    [SerializeField] private AudioClip arrow;
+    [SerializeField] private AudioClip death;
+    [SerializeField] private AudioClip fireball;
+    [SerializeField] private AudioClip gameover;
+    [SerializeField] private AudioClip hit;
+    [SerializeField] private AudioClip level;
+    [SerializeField] private AudioClip newGame;
+    [SerializeField] private AudioClip rock;
+    [SerializeField] private AudioClip towerBuilt;
 
     public AudioClip Arrow
     {

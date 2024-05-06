@@ -2,7 +2,9 @@
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class TowerManager : SingletonDontDestroyMono<TowerManager> {
+public class TowerManager : SingletonDontDestroyMono<TowerManager>
+{
+    private Tower towerSellected;
     public TowerButton towerButtonPressed { get; set; }
     private SpriteRenderer spriteRenderer;  //Setting image to our tower
     private List<Tower> TowerList = new List<Tower>();
@@ -38,6 +40,13 @@ public class TowerManager : SingletonDontDestroyMono<TowerManager> {
                 buildTile.tag = "buildSiteFull";     //This prevents us from stacking towers ontop of each other.
                 RegisterBuildSite(buildTile);
                 placeTower(hit);
+            }
+            if (towerSellected != null)
+                towerSellected.OnDeSellectedTower();
+            if (hit.collider.tag == "tower")
+            {
+                towerSellected = hit.transform.GetComponent<Tower>();
+                towerSellected.OnSellectTower();
             }
         }
 
@@ -101,6 +110,8 @@ public class TowerManager : SingletonDontDestroyMono<TowerManager> {
         {
             towerButtonPressed = towerSelected;
             enableDragSprite(towerSelected.DragSprite);
+            transform.GetChild(0).localScale = Vector3.one * towerSelected.TowerObject.range * 2;
+            transform.GetChild(0).gameObject.SetActive(true);
         }
     }
 
@@ -119,5 +130,6 @@ public class TowerManager : SingletonDontDestroyMono<TowerManager> {
     public void disableDragSprite()
     {
         spriteRenderer.enabled = false;
+        transform.GetChild(0).gameObject.SetActive(false);
     }
 }
