@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "LevelData/Level", fileName ="Level_")]
 public class LevelWaveData : ScriptableObject
 {
+    public int cointStart;
     public List<WayData> wayDatas;
 
     public int GetTotalEnemyOnWaveCurrent(int waveCurrent)

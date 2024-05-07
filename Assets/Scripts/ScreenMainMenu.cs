@@ -8,6 +8,7 @@ public class ScreenMainMenu : ScreenLayer
     [Header("Panel Main")]
     [SerializeField] private Transform panelMain;
     [SerializeField] private Button btnLevel;
+    [SerializeField] private Button btnOther;
     [SerializeField] private Transform panelGameOver;
 
     [Header("Panel Victory")]
@@ -20,9 +21,17 @@ public class ScreenMainMenu : ScreenLayer
     [SerializeField] private Text wave;
     [SerializeField] private Text killer;
 
+    [SerializeField] private Transform panelHightScore;
+    [SerializeField] private Text hightKiller;
+    [SerializeField] private Text totalWin;
+    [SerializeField] private Text totalLose;
+    [SerializeField] private Button btnBack;
+
     private void Start()
     {
         btnNext.onClick.AddListener(() => { Setup(); });
+        btnBack.onClick.AddListener(() => { panelHightScore.gameObject.SetActive(false); });
+        btnOther.onClick.AddListener(() => { panelHightScore.gameObject.SetActive(true); });
         btnLevel.onClick.AddListener(() => { ScreenManager.Instance.SL_LevelSellector.Open(); Close();});
     }
     public void SetupVictory()
@@ -48,6 +57,9 @@ public class ScreenMainMenu : ScreenLayer
     {
         panelGameOver.gameObject.SetActive(false);
         panelMain.gameObject.SetActive(true);
+        hightKiller.text = GameManager.Instance.userData.hightKiller.ToString();
+        totalLose.text = GameManager.Instance.userData.totalLose.ToString();
+        totalWin.text = GameManager.Instance.userData.totalWin.ToString();
     }
     public override void Close()
     {

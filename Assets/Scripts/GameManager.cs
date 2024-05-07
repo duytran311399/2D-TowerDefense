@@ -10,6 +10,7 @@ public enum gameStatus
 }
 public class GameManager : SingletonDontDestroyMono<GameManager> 
 {
+    public UserData userData;
     [SerializeField] private int totalWaves;
     [SerializeField] private GameObject spawnPoint;
     //[SerializeField] private List<WayData> levelWayData;
@@ -20,7 +21,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     [SerializeField] private Enemy[] enemies;
 
-    private int levelCurrent;
+    public int levelCurrent;
 
     private int waveCurrent = 0;
     private int totalMoney = 10;
@@ -79,18 +80,26 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
         get { return totalKillEnemy; }
         set { totalKillEnemy = value; }
     }
-
-    // Use this for initialization
-    void Start () {
+    void Start ()
+    {
+        LoadUserData();
         ShowMenu();
 	}
-	
-	// Update is called once per frame
 	void Update () {
         handleEscape();
-	}
+    }
+    void LoadUserData()
+    {
+        userData = ES3.Load<UserData>("userData", "userData.data", new UserData());
+    }
+    public void SaveUserData()
+    {
+        if (userData != null)
+            ES3.Save("userData", userData, "userData.data");
+    }
     public void LoadLevel(int Level)
     {
+        levelCurrent = Level - 1;
         ReloadLevel();
         SceneManager.LoadScene(Level, LoadSceneMode.Single);
         ScreenManager.Instance.CloseAllScreen();
@@ -162,18 +171,22 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     public void ShowMenu()
     {
+        if (userData.hightKiller < TotalKillEnemy) { userData.hightKiller = TotalKillEnemy; }
         if (TotalEnemyEscaped == 10)
         {
             ScreenManager.Instance.SL_MainMenu.SetupLose();
             ScreenManager.Instance.SL_GamePlay.Close();
+            userData.totalLose++;
         }
         else if(waveCurrent == totalWaves)
         {
             ScreenManager.Instance.SL_MainMenu.SetupVictory();
             ScreenManager.Instance.SL_GamePlay.Close();
+            userData.totalWin++;
         }
         else
             ScreenManager.Instance.SL_GamePlay.SetActivePlayButton(true);
+        SaveUserData();
     }
     public void SpawnNextWay()
     {
@@ -185,22 +198,23 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     public void ReloadLevel()
     {
         totalWaves = LevelDataCurrent.wayDatas.Count;
-
         waveCurrent = 0;
-        totalMoney = 10;
+        totalMoney = LevelDataCurrent.cointStart;
         totalEnemyEscaped = 0;
         totalKillEnemy = 0;
         totalKilled = 0;
         totalEscapedOnWave = 0;
         UnregisterEnemy();
-        
     }
     private void handleEscape()
     {
         if (Input.GetMouseButtonDown(1))
         {
-            TowerManager.Instance.disableDragSprite();
-            TowerManager.Instance.towerButtonPressed = null;
+            if(TowerManager.Instance != null)
+            {
+                TowerManager.Instance.disableDragSprite();
+                TowerManager.Instance.towerButtonPressed = null;
+            }
         }
     }
 
