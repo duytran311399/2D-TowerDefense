@@ -11,30 +11,32 @@ public enum gameStatus
 public class GameManager : SingletonDontDestroyMono<GameManager> 
 {
     public UserData userData;
-    [SerializeField] private int totalWaves;
+    private int TotalWavesCurrent   // Tổng số wave trong level hiện tại
+    {
+        get { return LevelDataCurrent.wayDatas.Count; }
+    }
     [SerializeField] private GameObject spawnPoint;
     //[SerializeField] private List<WayData> levelWayData;
-    [SerializeField] private List<LevelWaveData> levelWayDatas;
-    public LevelWaveData LevelDataCurrent
+    [SerializeField] private List<LevelWaveData> levelWayDatas; // Level Data (Chứa danh sách các level)
+    public LevelWaveData LevelDataCurrent   // Level hiện tại
     {
         get { return levelWayDatas[levelCurrent]; }
     }
-    [SerializeField] private Enemy[] enemies;
+    [SerializeField] private Enemy[] enemies;   // Enemy
 
-    public int levelCurrent;
+    public int levelCurrent;    // Level hiện tại
 
-    private int waveCurrent = 0;
-    private int totalMoney = 10;
-    private int totalEnemyEscaped = 0;
-    private int totalEscapedOnWave = 0;
-    private int totalKilled = 0;
-    private int totalKillEnemy = 0;
+    private int waveCurrent = 0;    // wave hiện tại
+    private int totalMoney = 10;    // Tiền
+    private int totalEnemyEscaped = 0;  // Tổng số enemy chạy thoát
+    private int totalEscapedOnWave = 0; // Tổng số enemy chạy thoát trong wave hiện tại
+    private int totalKilledOnWave = 0;  // Tổng số enemy đã hạ ở wave hiện tại      
+    private int totalKillEnemy = 0; // Tổng số enemy đã hạ ở level hiện tại
 
-    public List<Enemy> EnemyList = new List<Enemy>();
-    const float spawnDelay = 0.5f;
-    public Coroutine C_Spawn;
+    public List<Enemy> EnemyList = new List<Enemy>();   // EnemyList ở wave hiện tại
+    const float spawnDelay = 0.5f;  // thời gian giữa các enemy đc spawn
 
-    public int TotalEnemy
+    public int TotalEnemyOnWave
     {
         get { return LevelDataCurrent.GetTotalEnemyOnWaveCurrent(waveCurrent); }
     }
@@ -72,8 +74,8 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     //}
     public int TotalKilledOnWave
     {
-        get { return totalKilled; }
-        set { totalKilled = value; }
+        get { return totalKilledOnWave; }
+        set { totalKilledOnWave = value; }
     }
     public int TotalKillEnemy
     {
@@ -83,7 +85,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     void Start ()
     {
         LoadUserData();
-        ShowMenu();
+        CheckStateGame();
 	}
 	void Update () {
         handleEscape();
@@ -99,40 +101,36 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     public void LoadLevel(int Level)
     {
-        levelCurrent = Level - 1;
+        levelCurrent = Level - 1;   // Level 1 ứng vs level đầu tiên trong list LevelData => levelCurrent = 0
         ReloadLevel();
-        SceneManager.LoadScene(Level, LoadSceneMode.Single);
+        SceneManager.LoadScene(Level, LoadSceneMode.Single);    // Load Scene 1 (trong build setting)
         ScreenManager.Instance.CloseAllScreen();
         ScreenManager.Instance.SL_GamePlay.Open();
     }
     //This will spawn enemies, wait for the given spawnDelay then call itself again to spawn another enemy
     IEnumerator spawn()
     {
-        if (EnemyList.Count < TotalEnemy)
+        for (int i = 0; i < TotalEnemyOnWave; i++)  // Spawn Enemy 
         {
-            for (int i = 0; i < TotalEnemy; i++)
-            {
-                Enemy newEnemy = Instantiate(enemies[LevelDataCurrent.GetEnemy(waveCurrent, i)]);
-                newEnemy.transform.position = spawnPoint.transform.position;
-                RegisterEnemy(newEnemy);
-                yield return new WaitForSeconds(spawnDelay);
-            }
+            Enemy newEnemy = Instantiate(enemies[LevelDataCurrent.GetEnemy(waveCurrent, i)]);       // Tạo đối tượng Enemy
+            newEnemy.transform.position = spawnPoint.transform.position;                            
+            RegisterEnemy(newEnemy);                                                                // Đăng ký vào danh sách Enemy
+            yield return new WaitForSeconds(spawnDelay);                                            // Đợi sau spawnDelay rồi tiếp tục vòng lặp
         }
-        while(TotalEnemy > TotalKilledOnWave + TotalEscapeOnWave)
+        while (TotalEnemyOnWave > TotalKilledOnWave + TotalEscapeOnWave)   // Check điều kiện lặp
         {
             yield return new WaitForSeconds(1f);
             Debug.Log("Check Kill All");
-            if(TotalEnemyEscaped == 10)
+            if(TotalEnemyEscaped == 10)                 // Khi tổng enemy chạy thoát = 10 (10 đứa chạy thoát)
             {
-                Debug.Log("Losssssssss");
+                Debug.Log("Lose State");                // Thua
                 ScreenManager.Instance.SL_MainMenu.SetupLose();
                 ScreenManager.Instance.SL_GamePlay.Close();
                 SoundManager.Instance.Play(SoundManager.Instance.Gameover);
                 break;
             }
         }
-        //Debug.Log(TotalEnemy + " == " + TotalEscape + " + " + TotalKilled);
-        IsWaveOver();
+        IsWaveOver();                                   // Wave kêt thúc
     }
 
     ///Register - when enemy spawns
@@ -168,10 +166,10 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     public void IsWaveOver()
     {
         waveCurrent++;
-        ShowMenu();
+        CheckStateGame();
         ScreenManager.Instance.SL_GamePlay.PlayTimeCountDown();
     }
-    public void ShowMenu()
+    public void CheckStateGame()
     {
         if (userData.hightKiller < TotalKillEnemy) { userData.hightKiller = TotalKillEnemy; }
         if (TotalEnemyEscaped == 10)
@@ -180,7 +178,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
             ScreenManager.Instance.SL_GamePlay.Close();
             userData.totalLose++;
         }
-        else if(waveCurrent == totalWaves)
+        else if(waveCurrent == TotalWavesCurrent)
         {
             ScreenManager.Instance.SL_MainMenu.SetupVictory();
             ScreenManager.Instance.SL_GamePlay.Close();
@@ -199,12 +197,11 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     public void ReloadLevel()
     {
-        totalWaves = LevelDataCurrent.wayDatas.Count;
         waveCurrent = 0;
         totalMoney = LevelDataCurrent.cointStart;
         totalEnemyEscaped = 0;
         totalKillEnemy = 0;
-        totalKilled = 0;
+        totalKilledOnWave = 0;
         totalEscapedOnWave = 0;
         UnregisterEnemy();
     }

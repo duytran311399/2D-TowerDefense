@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BuildGround : MonoBehaviour
 {
-    public Tower towerBuild;
+    private Tower towerBuild;
     public bool IsBuilded
     {
         get { return towerBuild != null; }

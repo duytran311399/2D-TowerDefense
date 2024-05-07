@@ -14,6 +14,6 @@ public class ButtonLevel : MonoBehaviour
     public void Start()
     {
         t_level.text = levelID.ToString();
-        btnLevel.onClick.AddListener(() => { GameManager.Instance.LoadLevel(levelID); SoundManager.Instance.ButtonClickSound(); });
+        btnLevel.onClick.AddListener(() => { GameManager.Instance.LoadLevel(levelID); SoundManager.Instance.ButtonClickSound(); }); // Ch?n level theo levelID
     }
 }

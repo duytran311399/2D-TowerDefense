@@ -42,14 +42,13 @@ public class TowerManager : SingletonDestroyMono<TowerManager>
                 if (!buildSideSellected.IsBuilded)
                 {
                     buildTile = hit.collider;
-                    //buildTile.tag = "buildSiteFull";     //This prevents us from stacking towers ontop of each other.
                     RegisterBuildSite(buildTile);
-                    placeTower(hit);
+                    placeTower(hit);   // Build Tower
                 }
                 else
                 {
-                    towerSellected = buildSideSellected.GetTowerOnSide();
-                    towerSellected.OnSellectTower();
+                    towerSellected = buildSideSellected.GetTowerOnSide();   // Lấy Tower từ build Ground
+                    towerSellected.OnSellectTower();    // Chọn Tower
                 }
             }
         }

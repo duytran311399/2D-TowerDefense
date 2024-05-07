@@ -47,10 +47,6 @@ public class ScreenGamePlay : ScreenLayer
         SoundManager.Instance.Play(SoundManager.Instance.NewGame);
         currentWaveLabel.text = "Wave " + (WayCurrent + 1);
         timeCoundown.gameObject.SetActive(false);
-        if (GameManager.Instance.C_Spawn != null)
-        {
-            StopCoroutine(GameManager.Instance.C_Spawn);
-        }
         playButton.gameObject.SetActive(false);
     }
     public void SetActivePlayButton(bool isActive)
