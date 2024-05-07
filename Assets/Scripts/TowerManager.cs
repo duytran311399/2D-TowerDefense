@@ -2,7 +2,7 @@
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class TowerManager : SingletonDontDestroyMono<TowerManager>
+public class TowerManager : SingletonDestroyMono<TowerManager>
 {
     private Tower towerSellected;
     public TowerButton towerButtonPressed { get; set; }
@@ -107,7 +107,7 @@ public class TowerManager : SingletonDontDestroyMono<TowerManager>
         GameManager.Instance.SubtractMoney(price);
 
     }
-    public void selectedTower(TowerButton towerSelected)
+    public void SelectedTower(TowerButton towerSelected)
     {
         if(towerSelected.TowerPrice <= GameManager.Instance.TotalMoney)
         {

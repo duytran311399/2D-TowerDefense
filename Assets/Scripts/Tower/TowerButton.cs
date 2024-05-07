@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class TowerButton : MonoBehaviour {
     [SerializeField]
@@ -8,6 +9,10 @@ public class TowerButton : MonoBehaviour {
     [SerializeField]
     private int towerPrice;
 
+    public void Start()
+    {
+        GetComponent<Button>().onClick.AddListener(() => TowerManager.Instance.SelectedTower(this));
+    }
     public Tower TowerObject
     {
         get { return towerObject; }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public enum gameStatus
@@ -81,7 +82,12 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
 	void Update () {
         handleEscape();
 	}
-
+    public void LoadLevel(int Level)
+    {
+        SceneManager.LoadScene(Level, LoadSceneMode.Single);
+        ScreenManager.Instance.CloseAllScreen();
+        ScreenManager.Instance.SL_GamePlay.Open();
+    }
     //This will spawn enemies, wait for the given spawnDelay then call itself again to spawn another enemy
     IEnumerator spawn()
     {
@@ -141,8 +147,16 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     public void ShowMenu()
     {
-        if (waveCurrent == totalWaves)
+        if (TotalEscape == 10)
+        {
+            ScreenManager.Instance.SL_MainMenu.SetupLose();
+            ScreenManager.Instance.SL_GamePlay.Close();
+        }
+        else if(waveCurrent == totalWaves)
+        {
             ScreenManager.Instance.SL_MainMenu.SetupVictory();
+            ScreenManager.Instance.SL_GamePlay.Close();
+        }
         else
             ScreenManager.Instance.SL_GamePlay.SetActivePlayButton(true);
     }

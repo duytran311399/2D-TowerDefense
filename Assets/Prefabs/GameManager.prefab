@@ -46,18 +46,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalWaves: 1
-  totalMoneyLabel: {fileID: 0}
-  currentWaveLabel: {fileID: 0}
-  totalEscapedLabel: {fileID: 0}
   spawnPoint: {fileID: 1997868641983622, guid: 19425cfc21593b64aa8a4a642b213702, type: 3}
+  waySpawnDatas:
+  - {fileID: 11400000, guid: 8a9de8f2477b5354caeb03c7af97a07b, type: 2}
+  - {fileID: 11400000, guid: 2c9189ba0737f9e43bb1e180aa9a6d05, type: 2}
+  - {fileID: 11400000, guid: 70ab1050318731144b534b5789d3a3c7, type: 2}
+  - {fileID: 11400000, guid: f0f07e4eb38e2b540b49540adf5d665c, type: 2}
   enemies:
   - {fileID: 114281460287306446, guid: 6b8603f90542c11499f30fec4d74287e, type: 3}
   - {fileID: 114833652801850606, guid: 697f8da902db5bf4981bcd80f57cf657, type: 3}
   - {fileID: 114944403972158564, guid: 0aef1d8345d93ef439ac7d205cd15b18, type: 3}
-  totalEnemies: 3
-  enemiesPerSpawn: 1
-  playButtonLabel: {fileID: 0}
-  playButton: {fileID: 0}
   EnemyList: []
 --- !u!82 &82152112855147096
 AudioSource:
