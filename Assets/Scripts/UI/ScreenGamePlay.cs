@@ -12,6 +12,8 @@ public class ScreenGamePlay : ScreenLayer
 
     [SerializeField] private Button playButton;
     [SerializeField] private Text playButtonLabel;
+
+    Coroutine C_TimeCountDown;
     int WayCurrent
     {
         get { return GameManager.Instance.WayCurrent; }
@@ -24,8 +26,8 @@ public class ScreenGamePlay : ScreenLayer
     public void Start()
     {
         playButton.onClick.AddListener(() => { 
-            GameManager.Instance.SpawnNextWay();
-            playButtonPressed();
+            PlayNextWave();
+            SoundManager.Instance.ButtonClickSound();
         });
     }
     public void UpdateCoin(int totalMoney)
@@ -37,12 +39,15 @@ public class ScreenGamePlay : ScreenLayer
         totalEscapedLabel.text = "Escaped: " + escaped + "/10";
     }
 
-    public void playButtonPressed()
+    public void PlayNextWave()
     {
+        if(C_TimeCountDown != null) { StopCoroutine(C_TimeCountDown); }
+        GameManager.Instance.SpawnNextWay();
         totalEscapedLabel.text = "Escaped: " + Escaped + "/10";
         SoundManager.Instance.Play(SoundManager.Instance.NewGame);
         currentWaveLabel.text = "Wave " + (WayCurrent + 1);
-        if(GameManager.Instance.C_Spawn != null)
+        timeCoundown.gameObject.SetActive(false);
+        if (GameManager.Instance.C_Spawn != null)
         {
             StopCoroutine(GameManager.Instance.C_Spawn);
         }
@@ -52,17 +57,25 @@ public class ScreenGamePlay : ScreenLayer
     {
         playButton.gameObject.SetActive(isActive);
     }
-    public IEnumerator TimeCountdown()
+    public void PlayTimeCountDown()
+    {
+        C_TimeCountDown = StartCoroutine(TimeCountDown());
+    }
+    IEnumerator TimeCountDown()
     {
         int timeCD = 5;
-        while(timeCD > 0)
+        timeCoundown.gameObject.SetActive(true);
+        while (timeCD > 0)
         {
             timeCoundown.text = timeCD.ToString();
             yield return new WaitForSeconds(1f);
+            timeCD--;
         }
+        PlayNextWave();
     }
     void Setup()
     {
+        timeCoundown.gameObject.SetActive(false);
         playButton.gameObject.SetActive(true);
     }
     public override void Close()

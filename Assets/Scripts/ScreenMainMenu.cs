@@ -29,10 +29,10 @@ public class ScreenMainMenu : ScreenLayer
 
     private void Start()
     {
-        btnNext.onClick.AddListener(() => { Setup(); });
-        btnBack.onClick.AddListener(() => { panelHightScore.gameObject.SetActive(false); });
-        btnOther.onClick.AddListener(() => { panelHightScore.gameObject.SetActive(true); });
-        btnLevel.onClick.AddListener(() => { ScreenManager.Instance.SL_LevelSellector.Open(); Close();});
+        btnNext.onClick.AddListener(() => { Setup(); SoundManager.Instance.ButtonClickSound(); });
+        btnBack.onClick.AddListener(() => { panelHightScore.gameObject.SetActive(false); SoundManager.Instance.ButtonClickSound(); });
+        btnOther.onClick.AddListener(() => { panelHightScore.gameObject.SetActive(true); SoundManager.Instance.ButtonClickSound(); });
+        btnLevel.onClick.AddListener(() => { ScreenManager.Instance.SL_LevelSellector.Open(); Close(); SoundManager.Instance.ButtonClickSound(); });
     }
     public void SetupVictory()
     {

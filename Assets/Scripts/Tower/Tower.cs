@@ -12,6 +12,8 @@ public class Tower : MonoBehaviour
     /// </summary>
     private Transform target;
     [Header("Attribute")]
+    private int levelTower = 1;
+    public int cointRevert = 0;
     public float range = 15f;
     public float fireRate = 1.0f;
     private float fireCountdown = 0f;
@@ -142,8 +144,8 @@ public class Tower : MonoBehaviour
     }
     public void OnDestroyTower()
     {
-        Destroy(gameObject);
-
+        TowerManager.Instance.buildSideSellected.OnDestroyTower();
+        GameManager.Instance.TotalMoney += cointRevert * levelTower;
     }
     ///Move Projectile to Target Enemy
     //IEnumerator MoveProjectile(Projectile projectile)

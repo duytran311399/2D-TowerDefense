@@ -6,6 +6,7 @@ public class SoundManager : SingletonDontDestroyMono<SoundManager> {
 
     private AudioSource m_AudioSource;
     [SerializeField] private AudioClip arrow;
+    [SerializeField] private AudioClip click;
     [SerializeField] private AudioClip death;
     [SerializeField] private AudioClip fireball;
     [SerializeField] private AudioClip gameover;
@@ -18,6 +19,10 @@ public class SoundManager : SingletonDontDestroyMono<SoundManager> {
     public AudioClip Arrow
     {
         get { return arrow; }
+    }
+    public AudioClip Click
+    {
+        get { return click; }
     }
     public AudioClip Death
     {
@@ -60,5 +65,9 @@ public class SoundManager : SingletonDontDestroyMono<SoundManager> {
     public void Play(AudioClip clip)
     {
         m_AudioSource.PlayOneShot(clip);
+    }
+    public void ButtonClickSound()
+    {
+        m_AudioSource.PlayOneShot(click);
     }
 }

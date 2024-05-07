@@ -10,7 +10,7 @@ public class TowerManager : SingletonDestroyMono<TowerManager>
     private List<Tower> TowerList = new List<Tower>();
     private List<Collider2D> BuildList = new List<Collider2D>();
     private Collider2D buildTile;
-
+    public BuildGround buildSideSellected;
 	// Use this for initialization
 	void Start () {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -20,7 +20,7 @@ public class TowerManager : SingletonDestroyMono<TowerManager>
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonUp(0))
         {
             //worldPoint is the position of the mouse click.
             Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -33,21 +33,22 @@ public class TowerManager : SingletonDestroyMono<TowerManager>
             RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
 
             //Check to see if mouse press location is on buildSites
-            
-            if(hit.collider.tag == "buildSite")
+
+            if (towerSellected != null)
+                towerSellected.OnDeSellectedTower();
+            if (hit.collider.tag == "buildSite")
             {
-                buildTile = hit.collider;
-                buildTile.tag = "buildSiteFull";     //This prevents us from stacking towers ontop of each other.
-                RegisterBuildSite(buildTile);
-                placeTower(hit);
-            }
-            else
-            {
-                if (towerSellected != null)
-                    towerSellected.OnDeSellectedTower();
-                if (hit.collider.tag == "tower")
+                buildSideSellected = hit.collider.gameObject.GetComponent<BuildGround>();
+                if (!buildSideSellected.IsBuilded)
                 {
-                    towerSellected = hit.transform.GetComponent<Tower>();
+                    buildTile = hit.collider;
+                    //buildTile.tag = "buildSiteFull";     //This prevents us from stacking towers ontop of each other.
+                    RegisterBuildSite(buildTile);
+                    placeTower(hit);
+                }
+                else
+                {
+                    towerSellected = buildSideSellected.GetTowerOnSide();
                     towerSellected.OnSellectTower();
                 }
             }
@@ -95,6 +96,8 @@ public class TowerManager : SingletonDestroyMono<TowerManager>
         if (!EventSystem.current.IsPointerOverGameObject() && towerButtonPressed != null)
         {
             Tower newTower = Instantiate(towerButtonPressed.TowerObject);
+            if(buildSideSellected != null)
+                buildSideSellected.RegeterBuilderTower(newTower);
             newTower.transform.position = hit.transform.position;
             buyTower(towerButtonPressed.TowerPrice);
             SoundManager.Instance.Play(SoundManager.Instance.TowerBuilt);

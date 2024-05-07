@@ -127,6 +127,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
                 Debug.Log("Losssssssss");
                 ScreenManager.Instance.SL_MainMenu.SetupLose();
                 ScreenManager.Instance.SL_GamePlay.Close();
+                SoundManager.Instance.Play(SoundManager.Instance.Gameover);
                 break;
             }
         }
@@ -168,6 +169,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     {
         waveCurrent++;
         ShowMenu();
+        ScreenManager.Instance.SL_GamePlay.PlayTimeCountDown();
     }
     public void ShowMenu()
     {
