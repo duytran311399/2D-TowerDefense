@@ -12,8 +12,15 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
 {
     [SerializeField] private int totalWaves;
     [SerializeField] private GameObject spawnPoint;
-    [SerializeField] private List<WaySpawnData> waySpawnDatas;
+    //[SerializeField] private List<WayData> levelWayData;
+    [SerializeField] private List<LevelWaveData> levelWayDatas;
+    public LevelWaveData LevelDataCurrent
+    {
+        get { return levelWayDatas[levelCurrent]; }
+    }
     [SerializeField] private Enemy[] enemies;
+
+    private int levelCurrent;
 
     private int waveCurrent = 0;
     private int totalMoney = 10;
@@ -28,7 +35,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
 
     public int TotalEnemy
     {
-        get { return waySpawnDatas[waveCurrent].spawnData.enemies.Count; }
+        get { return LevelDataCurrent.GetTotalEnemyOnWaveCurrent(waveCurrent); }
     }
     public int TotalMoney
     {
@@ -75,8 +82,6 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
 
     // Use this for initialization
     void Start () {
-        totalWaves = waySpawnDatas.Count;
-        //audioSource = GetComponent<AudioSource>();
         ShowMenu();
 	}
 	
@@ -98,7 +103,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
         {
             for (int i = 0; i < TotalEnemy; i++)
             {
-                Enemy newEnemy = Instantiate(enemies[waySpawnDatas[waveCurrent].GetEnemy(i)]);
+                Enemy newEnemy = Instantiate(enemies[LevelDataCurrent.GetEnemy(waveCurrent, i)]);
                 newEnemy.transform.position = spawnPoint.transform.position;
                 RegisterEnemy(newEnemy);
                 yield return new WaitForSeconds(spawnDelay);
@@ -179,6 +184,8 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     public void ReloadLevel()
     {
+        totalWaves = LevelDataCurrent.wayDatas.Count;
+
         waveCurrent = 0;
         totalMoney = 10;
         totalEnemyEscaped = 0;
