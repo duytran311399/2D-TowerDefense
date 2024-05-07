@@ -22,7 +22,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     {
         get { return levelWayDatas[levelCurrent]; }
     }
-    [SerializeField] private Enemy[] enemies;   // Enemy
+    [SerializeField] private Enemy[] enemies;   // Enemy Object list
 
     public int levelCurrent;    // Level hiện tại
 
@@ -167,7 +167,6 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     {
         waveCurrent++;
         CheckStateGame();
-        ScreenManager.Instance.SL_GamePlay.PlayTimeCountDown();
     }
     public void CheckStateGame()
     {
@@ -185,7 +184,10 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
             userData.totalWin++;
         }
         else
+        {
             ScreenManager.Instance.SL_GamePlay.SetActivePlayButton(true);
+            ScreenManager.Instance.SL_GamePlay.PlayTimeCountDown();
+        }
         SaveUserData();
     }
     public void SpawnNextWay()
