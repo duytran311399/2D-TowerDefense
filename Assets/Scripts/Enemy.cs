@@ -76,7 +76,8 @@ public class Enemy : MonoBehaviour
         isDead = true;
         SoundManager.Instance.Play(SoundManager.Instance.Death);
         GameManager.Instance.AddMoney(rewardAmount);
-        GameManager.Instance.TotalKilled++;
+        GameManager.Instance.TotalKilledOnWave++;
+        GameManager.Instance.TotalKillEnemy++;
         //Debug.Log("TotalKilled" + GameManager.Instance.TotalKilled);
         Destroy(gameObject, 2f);
         gameObject.tag = "Untagged";
@@ -85,7 +86,8 @@ public class Enemy : MonoBehaviour
     {
         if(collision.gameObject.tag == "Finish")
         {
-            GameManager.Instance.TotalEscape++;
+            GameManager.Instance.TotalEnemyEscaped++;
+            GameManager.Instance.TotalEscapeOnWave++;
         }
     }
 }

@@ -61,7 +61,10 @@ public class ScreenGamePlay : ScreenLayer
             yield return new WaitForSeconds(1f);
         }
     }
-
+    void Setup()
+    {
+        playButton.gameObject.SetActive(true);
+    }
     public override void Close()
     {
         base.Close();
@@ -69,5 +72,6 @@ public class ScreenGamePlay : ScreenLayer
     public override void Open()
     {
         base.Open();
+        Setup();
     }
 }

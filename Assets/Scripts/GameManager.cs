@@ -43,25 +43,26 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     {
         get { return waveCurrent; }
     }
-    public int TotalEscape
+    public int TotalEscapeOnWave
     {
         get { return totalEscapedOnWave; }
         set 
         { 
             totalEscapedOnWave = value;
-            ScreenManager.Instance.SL_GamePlay.UpdateEscaped(totalEscapedOnWave + totalEnemyEscaped);
+            ScreenManager.Instance.SL_GamePlay.UpdateEscaped(totalEnemyEscaped);
         }
     }
     public int TotalEnemyEscaped
     {
         get { return totalEnemyEscaped; }
+        set { totalEnemyEscaped = value; }
     }
     //public int RoundEscaped
     //{
     //    get { return roundEscaped; }
     //    set { roundEscaped = value; }
     //}
-    public int TotalKilled
+    public int TotalKilledOnWave
     {
         get { return totalKilled; }
         set { totalKilled = value; }
@@ -69,6 +70,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     public int TotalKillEnemy
     {
         get { return totalKillEnemy; }
+        set { totalKillEnemy = value; }
     }
 
     // Use this for initialization
@@ -84,6 +86,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
 	}
     public void LoadLevel(int Level)
     {
+        ReloadLevel();
         SceneManager.LoadScene(Level, LoadSceneMode.Single);
         ScreenManager.Instance.CloseAllScreen();
         ScreenManager.Instance.SL_GamePlay.Open();
@@ -101,10 +104,17 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
                 yield return new WaitForSeconds(spawnDelay);
             }
         }
-        while(TotalEnemy > TotalKilled + TotalEscape)
+        while(TotalEnemy > TotalKilledOnWave + TotalEscapeOnWave)
         {
             yield return new WaitForSeconds(1f);
             Debug.Log("Check Kill All");
+            if(TotalEnemyEscaped == 10)
+            {
+                Debug.Log("Losssssssss");
+                ScreenManager.Instance.SL_MainMenu.SetupLose();
+                ScreenManager.Instance.SL_GamePlay.Close();
+                break;
+            }
         }
         //Debug.Log(TotalEnemy + " == " + TotalEscape + " + " + TotalKilled);
         IsWaveOver();
@@ -147,7 +157,7 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     public void ShowMenu()
     {
-        if (TotalEscape == 10)
+        if (TotalEnemyEscaped == 10)
         {
             ScreenManager.Instance.SL_MainMenu.SetupLose();
             ScreenManager.Instance.SL_GamePlay.Close();
@@ -162,12 +172,21 @@ public class GameManager : SingletonDontDestroyMono<GameManager>
     }
     public void SpawnNextWay()
     {
-        totalEnemyEscaped += TotalEscape;
-        totalKillEnemy += TotalKilled;
-        TotalEscape = 0;
-        TotalKilled = 0;
+        TotalEscapeOnWave = 0;
+        TotalKilledOnWave = 0;
         UnregisterEnemy();
         StartCoroutine(spawn());
+    }
+    public void ReloadLevel()
+    {
+        waveCurrent = 0;
+        totalMoney = 10;
+        totalEnemyEscaped = 0;
+        totalKillEnemy = 0;
+        totalKilled = 0;
+        totalEscapedOnWave = 0;
+        UnregisterEnemy();
+        
     }
     private void handleEscape()
     {
